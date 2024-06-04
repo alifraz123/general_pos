@@ -1,0 +1,40 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreateSaleBookDetailTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        if(!Schema::hasTable('sale_book_detail')){
+            Schema::create('sale_book_detail', function (Blueprint $table) {
+                $table->string('Invoice',20)->nullable();
+                $table->unsignedBigInteger('ItemName')->nullable();
+                $table->string('ItemCode',50)->nullable();
+                $table->decimal('Rate');
+                $table->Integer('Qty');
+                $table->decimal('Total');
+                $table->foreign('Invoice')->references('Invoice')->on('sale_book')->onDelete('cascade');
+                $table->foreign('ItemName')->references('id')->on('items')->onDelete('cascade');
+                $table->timestamps();
+            });
+        }
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('sale_book_detail');
+    }
+}

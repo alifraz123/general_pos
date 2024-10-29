@@ -181,7 +181,7 @@ class Reports extends Controller
         //     return $words;
         // }
 
-        $salebook = DB::table(sale_book)->where('Invoice', $request->Invoice)->first();
+        $salebook = DB::table('sale_book')->where('Invoice', $request->Invoice)->first();
         $lastwords = sprintf('%0.2f', ($salebook->FinalTotal));
         $final_total_ld = substr("$lastwords", -2); #final total last digit
         if ($final_total_ld == '00') {
@@ -196,7 +196,7 @@ class Reports extends Controller
 
         // return $salebook->PartyName;
 
-        $salebook_detail = DB::table(sale_book_detail)->where('Invoice', $request->Invoice)->get();
+        $salebook_detail = DB::table('sale_book_detail')->where('Invoice', $request->Invoice)->get();
         $value1 = Auth::user()->CompanyNameArabic;
         $tag1 = pack('H*', sprintf("%02X", 1));
         $length1 = pack('H*', sprintf("%02X", strlen($value1)));
@@ -215,7 +215,7 @@ class Reports extends Controller
         $str = base64_encode($tag1 . $length1 . $value1 . $tag2 . $length2 . $value2 . $tag3 . $length3 . $value3 . $tag4 . $length4 . $value4 . $tag5 . $length5 . $value5);
         $isPdf = $request->Pdf;
         return view('admin/modules/Reports/' . $Invoice_Design, [
-            sale_book => $salebook, sale_book_detail => $salebook_detail, 'strr' => $str, 'AmountInWords' => $AmountInWords, 'isPdf' => $isPdf, 'cr_number_arabic' => $cr_number_arabic
+            'sale_book' => $salebook, 'sale_book_detail' => $salebook_detail, 'strr' => $str, 'AmountInWords' => $AmountInWords, 'isPdf' => $isPdf, 'cr_number_arabic' => $cr_number_arabic
         ]);
     }
     public function printQuotation(Request $request)
@@ -240,7 +240,7 @@ class Reports extends Controller
         $quotation_detail = DB::table('quotation_detail')->where('Invoice', $request->Invoice)->get();
         $isPdf = $request->Pdf;
         return view('admin/modules/Reports/quotation', [
-            sale_book => $quotation, sale_book_detail => $quotation_detail,  'AmountInWords' => $AmountInWords, 'isPdf' => $isPdf, 'cr_number_arabic' => $cr_number_arabic
+            'sale_book' => $quotation, 'sale_book_detail' => $quotation_detail,  'AmountInWords' => $AmountInWords, 'isPdf' => $isPdf, 'cr_number_arabic' => $cr_number_arabic
         ]);
     }
 
@@ -248,12 +248,12 @@ class Reports extends Controller
     {
         $startDate = $request->startDate;
         $endDate = $request->endDate;
-        $salebook = DB::table(sale_book)->where('user', Auth::user()->id)->where('Ref', 'SB')->whereBetween('Date', [$startDate, $endDate])->get();
+        $salebook = DB::table('sale_book')->where('user', Auth::user()->id)->where('Ref', 'SB')->whereBetween('Date', [$startDate, $endDate])->get();
         $purchasebook = DB::table('purchase_book')->where('user', Auth::user()->id)->whereBetween('Date', [$startDate, $endDate])->get();
 
         $TotalQtyArray = [];
         for ($a = 0; $a < count($salebook); $a++) {
-            $Qty = DB::table(sale_book_detail)->where(['Invoice' => $salebook[$a]->Invoice])->count('Invoice');
+            $Qty = DB::table('sale_book_detail')->where(['Invoice' => $salebook[$a]->Invoice])->count('Invoice');
             array_push($TotalQtyArray, $Qty);
         }
 
@@ -265,14 +265,14 @@ class Reports extends Controller
 
         if (Auth::user()->domainName == 'fsct') {
             return view('admin/modules/Reports/FSCT_VAT_Report', [
-                sale_book => $salebook, 'purchase_book' => $purchasebook,
+                'sale_book' => $salebook, 'purchase_book' => $purchasebook,
                 'startDate' => $startDate, 'endDate' => $endDate,
                 'TotalQtyArray_purchase' => $TotalQtyArray_purchase,
                 'TotalQtyArray' => $TotalQtyArray
             ]);
         } else {
             return view('admin/modules/Reports/VAT_Report', [
-                sale_book => $salebook, 'purchase_book' => $purchasebook,
+                'sale_book' => $salebook, 'purchase_book' => $purchasebook,
                 'startDate' => $startDate, 'endDate' => $endDate
             ]);
         }
@@ -293,21 +293,21 @@ class Reports extends Controller
     {
         $startDate = $request->startDate;
         $endDate = $request->endDate;
-        $salebook = DB::table(sale_book)->where('user', Auth::user()->id)->where('Ref', 'SB')->whereBetween('Date', [$startDate, $endDate])->get();
+        $salebook = DB::table('sale_book')->where('user', Auth::user()->id)->where('Ref', 'SB')->whereBetween('Date', [$startDate, $endDate])->get();
         $TotalQtyArray = [];
         for ($a = 0; $a < count($salebook); $a++) {
-            $Qty = DB::table(sale_book_detail)->where(['Invoice' => $salebook[$a]->Invoice])->sum('Qty');
+            $Qty = DB::table('sale_book_detail')->where(['Invoice' => $salebook[$a]->Invoice])->sum('Qty');
             array_push($TotalQtyArray, $Qty);
         }
         // return TotalQtyArray;
         if (Auth::user()->domainName == 'fsct') {
             return view('admin/modules/Reports/FSCT_VAT_SaleReport', [
-                sale_book => $salebook,
+                'sale_book' => $salebook,
                 'startDate' => $startDate, 'endDate' => $endDate, 'TotalQtyArray' => $TotalQtyArray
             ]);
         } else {
             return view('admin/modules/Reports/VAT_SaleReport', [
-                sale_book => $salebook,
+                'sale_book' => $salebook,
                 'startDate' => $startDate, 'endDate' => $endDate
             ]);
         }
@@ -317,16 +317,16 @@ class Reports extends Controller
         $startDate = $request->startDate;
         $endDate = $request->endDate;
         $CustomerName = $request->CustomerName;
-        $salebook = DB::table(sale_book)->where('CustomerName', $CustomerName)->where('user', Auth::user()->id)->where('Ref', 'SB')->whereBetween('Date', [$startDate, $endDate])->get();
+        $salebook = DB::table('sale_book')->where('CustomerName', $CustomerName)->where('user', Auth::user()->id)->where('Ref', 'SB')->whereBetween('Date', [$startDate, $endDate])->get();
 
         if (Auth::user()->domainName == 'fsct') {
             return view('admin/modules/Reports/CustomerReport', [
-                sale_book => $salebook,
+                'sale_book' => $salebook,
                 'startDate' => $startDate, 'endDate' => $endDate, 'CustomerName' => $CustomerName
             ]);
         } else {
             return view('admin/modules/Reports/CustomerReport', [
-                sale_book => $salebook,
+                'sale_book' => $salebook,
                 'startDate' => $startDate, 'endDate' => $endDate
             ]);
         }
@@ -362,7 +362,7 @@ class Reports extends Controller
 
         $startDate = $request->startDate;
         $endDate = $request->endDate;
-        $salebook = DB::table(sale_book)->where('user', Auth::user()->id)->where('Ref', 'SB')->whereBetween('Date', [$startDate, $endDate])->get();
+        $salebook = DB::table('sale_book')->where('user', Auth::user()->id)->where('Ref', 'SB')->whereBetween('Date', [$startDate, $endDate])->get();
         $purchasebook = DB::table('purchase_book')->where('user', Auth::user()->id)->whereBetween('Date', [$startDate, $endDate])->get();
 
         return view('admin/modules/Reports/TotalReport', [

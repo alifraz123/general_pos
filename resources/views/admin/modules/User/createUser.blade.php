@@ -46,10 +46,10 @@
                 <h6 class="alert alert-success">{{ session('status') }}</h6>
                 @endif
 
+                @if(Auth::user()->UserType == "Admin")
                 <div class="box box-default">
 
                     <div class=" box-body">
-                        @if(Auth::user()->UserType == "Admin")
                         <form onsubmit="event.preventDefault(); check();" method="post" id="formId" enctype="multipart/form-data" action="insertCreatedUser">
                             @csrf
                             <div class="row">
@@ -256,9 +256,9 @@
 
                 </div>
                 </form>
-                @endif
             </div>
         </div>
+        @endif
 
         <div class="box box-default">
             <div class="box-body">

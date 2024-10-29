@@ -35,13 +35,13 @@ class DispatchController extends Controller
         if ($request->Ref == 'SB') {
            
             return view('admin/modules/SalesBook/Salebook/showSaleInvoices', ['saleInvoices' => 
-            DB::table(sale_book)->join('customers','salebook.CustomerName','customers.id')
+            DB::table('sale_book')->join('customers','salebook.CustomerName','customers.id')
             ->where('salebook.Ref', 'SB')
             ->where('salebook.user', Auth::user()->id)->whereBetween('salebook.Date', [$startDate, $endDate])
             ->select('salebook.*','customers.CustomerName')
             ->get()]);
         } elseif ($request->Ref == 'SR') {
-            return view('admin/modules/SalesBook/SaleReturn/showSaleReturnInvoices', ['saleInvoices' => DB::table(sale_book)
+            return view('admin/modules/SalesBook/SaleReturn/showSaleReturnInvoices', ['saleInvoices' => DB::table('sale_book')
                 ->where('Ref', 'SR')
                 ->where('user', Auth::user()->id)->whereBetween('Date', [$startDate, $endDate])->get()]);
         } elseif ($request->Ref == 'QT') {
@@ -51,8 +51,8 @@ class DispatchController extends Controller
     public function edit_invoice_method(Request $request)
     {
         $salebook_detail = [];
-        $salebook = DB::table(sale_book)->where('salebook.Invoice', $request->id)->first();
-        $salebook_detail = DB::table(sale_book_detail)->join('items','items.id','salebook_detail.ItemName')
+        $salebook = DB::table('sale_book')->where('salebook.Invoice', $request->id)->first();
+        $salebook_detail = DB::table('sale_book_detail')->join('items','items.id','salebook_detail.ItemName')
         ->where('salebook_detail.invoice', $request->id)
         ->select('items.ItemName as items_ItemName','items.id as item_id','salebook_detail.*')
         ->get();
@@ -61,21 +61,21 @@ class DispatchController extends Controller
         if ($request->Ref == "SB") {
             return view(
                 'admin/modules/SalesBook/Salebook/edit_invoice',
-                [sale_book => $salebook, sale_book_detail => $salebook_detail, 'Customers' => $Customers,
+                ['sale_book' => $salebook, 'sale_book_detail' => $salebook_detail, 'Customers' => $Customers,
                 'paymenttypes' => $paymenttypes
                 ]
             );
         } elseif ($request->Ref == 'SR') {
             return view(
                 'admin/modules/SalesBook/SaleReturn/edit_SaleReturnInvoice',
-                [sale_book => $salebook, sale_book_detail => $salebook_detail, 'Customers' => $Customers,'paymenttypes' => $paymenttypes]
+                ['sale_book' => $salebook, 'sale_book_detail' => $salebook_detail, 'Customers' => $Customers,'paymenttypes' => $paymenttypes]
             );
         } elseif ($request->Ref == 'QT') {
             $salebook = DB::table('quotation')->where('Invoice', $request->id)->get();
             $salebook_detail = DB::table('quotation_detail')->where('invoice', $request->id)->get();
             return view(
                 'admin/modules/SalesBook/Quotation/edit_quotation',
-                [sale_book => $salebook, sale_book_detail => $salebook_detail, 'Customers' => $Customers]
+                ['sale_book' => $salebook, 'sale_book_detail' => $salebook_detail, 'Customers' => $Customers]
             );
         }
     }
@@ -86,7 +86,7 @@ class DispatchController extends Controller
 
         $invoice = $_GET['Invoice'];
 
-        $SaleData = DB::table(sale_book_detail)->where('Invoice', $invoice)->get();
+        $SaleData = DB::table('sale_book_detail')->where('Invoice', $invoice)->get();
         for ($a = 0; $a < count($SaleData); $a++) {
             $sbd_quantity = $SaleData[$a]->Qty;
 
@@ -99,10 +99,10 @@ class DispatchController extends Controller
         }
 
 
-        $dispatch_detail =  DB::table(sale_book_detail)
+        $dispatch_detail =  DB::table('sale_book_detail')
             ->where('Invoice', $invoice)
             ->delete();
-        $dispatch =  DB::table(sale_book)
+        $dispatch =  DB::table('sale_book')
             ->where('Invoice', $invoice)
             ->delete();
             DB::table('ledger')->where('Invoice', $invoice)->delete();
@@ -135,7 +135,7 @@ class DispatchController extends Controller
 
     public function update_dispatch(Request $request)
     {
-        DB::table(sale_book)->where('invoice', $request->invoice_edit)->update([
+        DB::table('sale_book')->where('invoice', $request->invoice_edit)->update([
             'CustomerName' => $request->CustomerName == '' ? '' : $request->CustomerName,
             'VATNO' => $request->VATNO == '' ? '' : $request->VATNO,
             'invoiceDateTime' => $request->Date . ' ' . date("h:i:s"),
@@ -153,7 +153,7 @@ class DispatchController extends Controller
         ]);
 
 
-        DB::table(sale_book_detail)->where('invoice', $request->invoice_edit)->delete();
+        DB::table('sale_book_detail')->where('invoice', $request->invoice_edit)->delete();
 
         $total_cost_sale_service = 0;
         $abc = [];
@@ -171,7 +171,7 @@ class DispatchController extends Controller
                     'Qty' => $request->obj[$key]['Qty'],
                     'Rate' => $request->obj[$key]['Price'], 'Total' => $request->obj[$key]['Total'],
                 ];
-                DB::table(sale_book_detail)->insert($abc);
+                DB::table('sale_book_detail')->insert($abc);
                 $total_cost_sale_service += DB::table('items')->where('id',$request->obj[$key]['ItemName'])->value('PurchaseRate');
             }
         }
@@ -368,7 +368,7 @@ class DispatchController extends Controller
     public function checkDate_isPrevious(Request $request)
     {
         $article = explode('-', $request->Invoice)[0];
-        $Invoice =  DB::table(sale_book)->where('user', Auth::user()->id)->where('Invoice', $request->Invoice)->first();
+        $Invoice =  DB::table('sale_book')->where('user', Auth::user()->id)->where('Invoice', $request->Invoice)->first();
         if ($article != Auth::user()->ArticleNo) {
             return 'Article is not matching';
         } else if ($Invoice) {
@@ -381,7 +381,7 @@ class DispatchController extends Controller
     public function dispatch_method(Request $request)
     {
         $ArticleNo = DB::table('users')->where('id', Auth::user()->id)->first('ArticleNo')->ArticleNo;
-        $InvoiceList = DB::table(sale_book)->where('user', Auth::user()->id)->pluck('Invoice')->toArray();
+        $InvoiceList = DB::table('sale_book')->where('user', Auth::user()->id)->pluck('Invoice')->toArray();
         $temp = array();
         
         if (count($InvoiceList) == 0) {
@@ -447,7 +447,7 @@ class DispatchController extends Controller
                     'Total' => $request->obj[$key]['Total'],
 
                 ];
-                DB::table(sale_book_detail)->insert($abc);
+                DB::table('sale_book_detail')->insert($abc);
                 $total_cost_sale_service += DB::table('items')->where('id',$request->obj[$key]['ItemName'])->value('PurchaseRate');
 
             }
@@ -586,7 +586,7 @@ class DispatchController extends Controller
         
 
         $ArticleNo = DB::table('users')->where('id', Auth::user()->id)->first('ArticleNo')->ArticleNo;
-        $InvoiceList = DB::table(sale_book)->where('user', Auth::user()->id)->pluck('Invoice')->toArray();
+        $InvoiceList = DB::table('sale_book')->where('user', Auth::user()->id)->pluck('Invoice')->toArray();
         $temp = array();
         for ($i = 0; $i < count($InvoiceList); $i++) {
             for ($j = $i + 1; $j < count($InvoiceList); $j++) {

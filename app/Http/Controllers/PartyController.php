@@ -49,8 +49,8 @@ class PartyController extends Controller
                 [$request->CustomerName, $request->Contact, $request->Address, Auth::user()->id]
             );
             if ($Customer) {
-                if ($request->requestFrom == sale_book) {
-                    return redirect(sale_book);
+                if ($request->requestFrom == 'sale_book') {
+                    return redirect('sale_book');
                 } else {
 
                     return redirect('Customer');
@@ -75,7 +75,7 @@ class PartyController extends Controller
 
         ]);
 
-        $updatedRole = DB::table(sale_book)
+        $updatedRole = DB::table('sale_book')
             ->where(['user' => Auth::user()->id])->update([
                 'CustomerName' => $request->CustomerName,
             ]);
@@ -265,7 +265,7 @@ class PartyController extends Controller
             'CustomerType' => $request->CustomerType,
 
         ]);
-        DB::table(sale_book)->where('CustomerType', $request->modal_CustomerType_id)->where('user', Auth::user()->id)->update([
+        DB::table('sale_book')->where('CustomerType', $request->modal_CustomerType_id)->where('user', Auth::user()->id)->update([
             'CustomerType' => $request->CustomerType
         ]);
 
@@ -382,7 +382,7 @@ class PartyController extends Controller
 
         ]);
 
-        $updatedRole = DB::table(sale_book_detail)
+        $updatedRole = DB::table('sale_book_detail')
             ->where(['ItemName' => $request->hidden_ItemName])->update([
                 'ItemName' => $request->ItemName,
                 'ItemCode' => $request->ItemCode
@@ -408,7 +408,7 @@ class PartyController extends Controller
     {
         $ArticleNo = DB::table('users')->where('id', Auth::user()->id)->first('ArticleNo')->ArticleNo;
         // return Auth::user()->id;
-        $InvoiceList = DB::table(sale_book)->where('user', Auth::user()->id)->pluck('Invoice')->toArray();
+        $InvoiceList = DB::table('sale_book')->where('user', Auth::user()->id)->pluck('Invoice')->toArray();
         if ($request->Ref == "QT") {
             $InvoiceList = DB::table('quotation')->where('user', Auth::user()->id)->pluck('Invoice')->toArray();
         }
